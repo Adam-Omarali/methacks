@@ -1,24 +1,15 @@
 import * as React from 'react';
-import { AudioRecorder, useAudioRecorder } from 'react-audio-voice-recorder';
-
+import { WavRecorder } from "webm-to-wav-converter";
 export default function App() {
-  const recorderControls = useAudioRecorder();
-  const addAudioElement = (blob) => {
-    const url = URL.createObjectURL(blob);
-    const audio = document.createElement('audio');
-    audio.src = url; //sets the audio of the audio element to whatever it was that we recorded
-    audio.controls = true;
-    document.body.appendChild(audio); //makes the audio available for us to work with.
-  };
+  const wavRecorder = new WavRecorder();
+ 
 
   return (
     <div>
-     <AudioRecorder
-        onRecordingComplete={(blob) => addAudioElement(blob)}
-        recorderControls={recorderControls}
-      />
       <br />
-      <button onClick={recorderControls.stopRecording}>Stop recording</button>
+      <button onClick={() => wavRecorder.start()}>Start</button>
+      <button onClick={() => wavRecorder.stop()}>Stop</button>
+      <button onClick={() => wavRecorder.download('myFile.wav',true, { sampleRate:  96000 })}>Download</button>
       <br />
     </div>
   );

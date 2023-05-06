@@ -11,8 +11,14 @@
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.11.6",
     "electron-serve": "^1.1.0",
-    "electron-store": "^8.1.0"
+    "electron-store": "^8.1.0",
+    "ffmpeg": "^0.0.4",
+    "mic-recorder-to-mp3": "^2.2.2",
+    "react-audio-voice-recorder": "^1.0.10",
+    "react-media-recorder": "^1.6.6",
+    "webm-to-wav-converter": "^1.1.0"
   },
   "devDependencies": {
     "@types/node": "^18.11.18",
