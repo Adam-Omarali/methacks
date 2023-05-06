@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 const core = require('@magenta/music/node/core');
@@ -25,8 +25,10 @@ function Home() {
     totalTime: 8
   };
 
-  const player = new core.Player();
-  player.start(TWINKLE_TWINKLE);
+  useEffect(() => {
+    const player = new core.Player();
+    player.start(TWINKLE_TWINKLE);
+  }, [])
 
   return (
     <React.Fragment>
