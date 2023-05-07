@@ -40,13 +40,13 @@ const TWINKLE_TWINKLE = {
 };
 
 // melody generation
-async function generateAISeq() {
+async function generateAISeq(seq=TWINKLE_TWINKLE) {
     if (rnnPlayer.isPlaying()) {
         rnnPlayer.stop();
         return;
     }
 
-    const qns = core.sequences.quantizeNoteSequence(TWINKLE_TWINKLE, 4);
+    const qns = core.sequences.quantizeNoteSequence(seq, 4);
     melodyPlayer
     .continueSequence(qns, rnn_steps, rnn_temperature)
     .then(sample => {
@@ -110,6 +110,7 @@ async function generateAISeq() {
 
 export default function Create() {
     const [melodySeq, setMelodySeq] = useState()
+    const [melodyFinal, setMelodyFinal] = useState()
     const [kickSeq, setKickSeq] = useState()
     const [snareSeq, setSnareSeq] = useState()
     const [hihatSeq, setHihatSeq] = useState()
@@ -147,7 +148,7 @@ export default function Create() {
 //   }
 
     function returnPitch(i, pitch) {
-        let alt = pitch[i].substring(-1);
+        let alt = pitch[i].substring(pitch[i].length - 1);
         let baseNote = basePitch[alt - 2];
         let add;
         if (pitch[i].length == 3) {
@@ -157,33 +158,55 @@ export default function Create() {
             add = pitchLetter.indexOf(pitch[i].substring(0));
         }
         let note;
-        return note = baseNote + add;
+        return note = baseNote + add + 12;
     }
 
     function seqGen(duration, pitch) {
         let startT = [];
         let endT = [];
-        let cnt;
+        let cnt = 0;
+        let newSeq = []
         for (let i = 0; i < duration.length; i++) {
-            cnt += duration[i - 1] / 128;
+            cnt += duration[i];
             if (i == 0) {
             startT[i] = 0;
             } else {
-            startT[i] = cnt;
+            startT[i] = endT[i - 1];
             }
             endT[i] = cnt;
         }
 
         for (let i = 0; i < duration.length; i++) {
-            return { pitch: returnPitch(i, pitch), startTime: startT[i], endTime: endT[i] } + ",\n";
+            newSeq.push({ pitch: returnPitch(i, pitch), startTime: startT[i], endTime: endT[i] })
         }
+        return newSeq
     }
     
-    useEffect(() => {
+    // useEffect(() => {
 
-        generateAISeq();
+    //     generateAISeq();
             
-      }, [])
+    // }, [])
+
+    useEffect(() => {
+        if(melodySeq){
+            let duration = []
+            let pitch = []
+            melodySeq.map(note => {
+                duration.push(note.duration)
+                pitch.push(note.pitch)
+            })
+
+            let seq = seqGen(duration, pitch)
+
+            let final = {
+                notes: seq,
+                totalTime: Math.ceil(seq[seq.length - 1].endTime)
+            }
+            setMelodyFinal(final)
+            rnnPlayer.start(final)
+        }
+    }, [melodySeq])
 
   return (
     <div className='flex flex-col justify-center h-screen'>
@@ -193,18 +216,14 @@ export default function Create() {
             <Tuner drums={true} instrument={"Kick"} setSeq={setKickSeq}/>
             <Tuner drums={true} instrument={"Hi Hat"} setSeq={setHihatSeq}/>
         </div>
-        <div className='mt-1 w-full flex-wrap flex justify-center'>
-            <Link href="/home">
-                <a className='text-white font-bold px-4 py-2 rounded bg-green-600'>Listen</a>
-            </Link>
+        <div className='mt-1 w-full flex-wrap flex justify-center' onClick={() => rnnPlayer.start(melodyFinal)}>
+            <button className='text-white font-bold px-4 py-2 rounded bg-green-600'>Listen</button>
+        </div>
+        <div className='mt-1 w-full flex-wrap flex justify-center' onClick={() => melodySeq ? generateAISeq(melodySeq) : generateAISeq()}>
+            <button className='text-white font-bold px-4 py-2 rounded bg-blue-600'>Generate</button>
         </div>
         <div className='mt-1 w-full flex-wrap flex justify-center'>
-            <Link href="/home">
-                <a className='text-white font-bold px-4 py-2 rounded bg-blue-600'>Generate</a>
-            </Link>
-        </div>
-        <div className='mt-1 w-full flex-wrap flex justify-center'>
-            <Link href="/home">
+            <Link href={"/home"}>
                 <a className='text-white font-bold px-4 py-2 rounded bg-black-600'>Home</a>
             </Link>
         </div>
