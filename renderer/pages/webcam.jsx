@@ -28,7 +28,7 @@ import * as fp from "fingerpose";
 function Camrecognize() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
-  const [cameraOn, setCameraOn] = useState(false);
+  const [cameraOn, setCameraOn] = useState(true);
   const [gestureName, setGestureName] = useState(null);
   const [heightPCT, setHeightPCT] = useState(1);
 
@@ -56,7 +56,6 @@ function Camrecognize() {
 
       if (hand.length > 0) {
         setHeightPCT((videoHeight - (hand[0].boundingBox.bottomRight[1] + hand[0].boundingBox.topLeft[1]) / 2) / videoHeight)
-        console.log(`Volume height: ${heightPCT}`);
         const GE = new fp.GestureEstimator(
           [
             fist,
