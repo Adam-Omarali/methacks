@@ -125,7 +125,7 @@ function Home() {
       const qns = core.sequences.quantizeNoteSequence(TWINKLE_TWINKLE, 4);
       melodyPlayer
       .continueSequence(qns, rnn_steps, rnn_temperature)
-      .sample.notes.forEach(n => n.program = fontSelection[fontIdx][0],
+      .then(sample).forEach(n => n.program = fontSelection[fontIdx][0],
         n => n.pitch += 4,
         n => n.velocity *= velocities[0]
       );
