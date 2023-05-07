@@ -19,7 +19,7 @@ export const drawHand = (predictions, ScreenDimension, ctx) => {
             ctx.beginPath();
             ctx.moveTo(0, volume);
             ctx.lineTo(ScreenDimension[0], volume);
-            ctx.strokeStyle = `rgba(95, 184, 94, ${2 - 2 * volume})`;
+            ctx.strokeStyle = `rgba(95, 184, 94)`;
             ctx.lineWidth = 2;
             ctx.stroke();
 
