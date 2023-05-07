@@ -30,7 +30,6 @@ const noteStrings = [
 
 let finalNotes = []
 let tempNotes = []
-let finalDuration = []
 
 function CompressMelody(){
   let lastChange = 0;
@@ -39,16 +38,13 @@ function CompressMelody(){
     let currNote = tempNotes[i]
     if (tempNotes[i]!=tempNotes[i+1]){
       if(i-lastChange > 2){
-        finalNotes.push(currNote)
-        finalDuration.push(0.1*(i-lastChange))
+        finalNotes.push({pitch: currNote, duration: 0.1*(i-lastChange)})
         lastChange = i
       }
     }
   }
   if(finalNotes[0].duration < 0.3) finalNotes.splice(0, 1)
-  tempNotes = []
-  finalNotes = []
-  finalDuration = []
+  return finalNotes
 }
 
 let prevPitch;
@@ -102,17 +98,17 @@ function Tuner(props) {
     }
   };
 
-
-
   useEffect(() => {
     if (source != null) {
       source.connect(analyserNode);
     }
   }, [source]);
 
-  // setInterval(updatePitch, 1);
 
   const start = async () => {
+    finalNotes = []
+    tempNotes = []
+    duration = []
     setIntID(setInterval(updatePitch, 100))
     const input = await getMicInput();
 
@@ -130,7 +126,7 @@ function Tuner(props) {
     clearInterval(intID);
     setStart(false);
     let finalArr = props.drums ? duration : CompressMelody();
-    console.log(finalArr)
+    props.setSeq(finalArr)
   };
 
   const getMicInput = () => {
