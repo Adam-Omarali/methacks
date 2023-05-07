@@ -13,11 +13,11 @@ const fontSelection = [[40, 41, 42, 43], [68, 73, 60, 70], [56, 59, 57, 58]];
 
 let avoidChord = [6, 8, 11];
 
-let fontIdx = 0;
+let fontIdx = 1;
 
 let melodyPlayer = new music_rnn.MusicRNN('https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/melody_rnn');
 let rnnPlayer = new core.SoundFontPlayer('https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus');
-let rnnPlayer2 = new core.SoundFontPlayer('https://storage.googleapis.com/magentadata/js/soundfonts/jazz_kit');
+let rnnPlayer2 = new core.SoundFontPlayer('https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus');
 
 const TWINKLE_TWINKLE = {
     notes: [
@@ -39,6 +39,8 @@ const TWINKLE_TWINKLE = {
     totalTime: 8
 };
 
+
+
 // melody generation
 async function generateAISeq(seq=TWINKLE_TWINKLE) {
     if (rnnPlayer.isPlaying()) {
@@ -56,6 +58,9 @@ async function generateAISeq(seq=TWINKLE_TWINKLE) {
         n.pitch += 4
         n.velocity *= velocities[0]
         });
+        for (let i = 0; i < TWINKLE_TWINKLE.length; i++) {
+            n = TWINKLE_TWINKLE[i];
+        }
 
         let finalSample = [];
 
@@ -103,6 +108,7 @@ async function generateAISeq(seq=TWINKLE_TWINKLE) {
         })
 
     sample.notes = finalSample;
+
     rnnPlayer.start(sample);
 
     })
