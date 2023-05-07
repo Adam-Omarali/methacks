@@ -20,7 +20,17 @@ function Home() {
       </div>
       <div className='mt-1 w-full flex-wrap flex justify-center'>
         <Link href='/next'>
-          <a className='btn-blue'>Go to next page</a>
+          <a className='btn-blue'>Tuner</a>
+        </Link>
+      </div>
+      <div className='mt-1 w-full flex-wrap flex justify-center'>
+        <Link href='/drums'>
+          <a className='btn-blue'>Drums</a>
+        </Link>
+      </div>
+      <div className='mt-1 w-full flex-wrap flex justify-center'>
+        <Link href='/microphone'>
+          <a className='btn-blue'>Microphone</a>
         </Link>
       </div>
     </React.Fragment>
