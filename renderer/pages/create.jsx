@@ -13,11 +13,11 @@ const fontSelection = [[40, 41, 42, 43], [68, 73, 60, 70], [56, 59, 57, 58]];
 
 let avoidChord = [6, 8, 11];
 
-let fontIdx = 1;
+let fontIdx = 0;
 
 let melodyPlayer = new music_rnn.MusicRNN('https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/melody_rnn');
 let rnnPlayer = new core.SoundFontPlayer('https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus');
-let rnnPlayer2 = new core.SoundFontPlayer('https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus');
+let drumPlayer = new core.SoundFontPlayer('https://storage.googleapis.com/magentadata/js/soundfonts/jazz_kit');
 
 const TWINKLE_TWINKLE = {
     notes: [
@@ -42,7 +42,7 @@ const TWINKLE_TWINKLE = {
 
 
 // melody generation
-async function generateAISeq(seq=TWINKLE_TWINKLE) {
+async function generateAISeq(seq=TWINKLE_TWINKLE, drums=undefined) {
     if (rnnPlayer.isPlaying()) {
         rnnPlayer.stop();
         return;
@@ -58,8 +58,8 @@ async function generateAISeq(seq=TWINKLE_TWINKLE) {
         n.pitch += 4
         n.velocity *= velocities[0]
         });
-        for (let i = 0; i < TWINKLE_TWINKLE.length; i++) {
-            n = TWINKLE_TWINKLE[i];
+        for (let i = 0; i < seq.length; i++) {
+            n = seq[i];
         }
 
         let finalSample = [];
@@ -110,6 +110,9 @@ async function generateAISeq(seq=TWINKLE_TWINKLE) {
     sample.notes = finalSample;
 
     rnnPlayer.start(sample);
+    if(drums){
+        drumPlayer.start(drums);
+    }
 
     })
 }
@@ -118,6 +121,7 @@ export default function Create() {
     const [melodySeq, setMelodySeq] = useState()
     const [melodyFinal, setMelodyFinal] = useState()
     const [kickSeq, setKickSeq] = useState()
+    const [kickFinal, setKickFinal] = useState()
     const [snareSeq, setSnareSeq] = useState()
     const [hihatSeq, setHihatSeq] = useState()
     
@@ -164,7 +168,7 @@ export default function Create() {
             add = pitchLetter.indexOf(pitch[i].substring(0));
         }
         let note;
-        return note = baseNote + add + 12;
+        return note = baseNote + add + 24;
     }
 
     function seqGen(duration, pitch) {
@@ -173,7 +177,7 @@ export default function Create() {
         let cnt = 0;
         let newSeq = []
         for (let i = 0; i < duration.length; i++) {
-            cnt += duration[i];
+            cnt += Math.round(duration[i] * 2) / 2;
             if (i == 0) {
             startT[i] = 0;
             } else {
@@ -207,12 +211,36 @@ export default function Create() {
 
             let final = {
                 notes: seq,
-                totalTime: Math.ceil(seq[seq.length - 1].endTime)
+                // totalTime: Math.ceil(seq[seq.length - 1].endTime)
+                totalTime: 8
             }
             setMelodyFinal(final)
             rnnPlayer.start(final)
         }
     }, [melodySeq])
+
+    useEffect(() => {
+        if(kickSeq){
+            let notes = []
+            let startTime = 0
+            let count = 0
+            kickSeq.map((time, idx) => {
+                let temp = 0.5
+                if(idx < kickSeq.length - 1){
+                    temp = kickSeq[idx + 1]
+                }
+                notes.push({pitch: 45, startTime: idx==0 ? 0 : temp + count, endTime: temp + time + count, isDrum: true})
+                startTime = time
+                count += time
+            })
+            let final = {
+                notes: notes,
+                totalTime: 8
+            }
+            setKickFinal(final)
+            drumPlayer.start(final)
+        }
+    }, [kickSeq])
 
   return (
     <div className='flex flex-col justify-center h-screen'>
@@ -222,10 +250,13 @@ export default function Create() {
             <Tuner drums={true} instrument={"Kick"} setSeq={setKickSeq}/>
             <Tuner drums={true} instrument={"Hi Hat"} setSeq={setHihatSeq}/>
         </div>
-        <div className='mt-1 w-full flex-wrap flex justify-center' onClick={() => rnnPlayer.start(melodyFinal)}>
-            <button className='text-white font-bold px-4 py-2 rounded bg-green-600'>Listen</button>
-        </div>
-        <div className='mt-1 w-full flex-wrap flex justify-center' onClick={() => melodySeq ? generateAISeq(melodySeq) : generateAISeq()}>
+        {rnnPlayer.isPlaying() ? null : <div className='mt-1 w-full flex-wrap flex justify-center' onClick={() => rnnPlayer.start(melodyFinal)}>
+            <button className='text-white font-bold px-4 py-2 rounded bg-green-600'>Listen Melody</button>
+        </div>}
+        {drumPlayer.isPlaying() ? null : <div className='mt-1 w-full flex-wrap flex justify-center' onClick={() => drumPlayer.start(kickFinal)}>
+            <button className='text-white font-bold px-4 py-2 rounded bg-green-600'>Listen Drums</button>
+        </div>}
+        <div className='mt-1 w-full flex-wrap flex justify-center' onClick={() => melodySeq ? generateAISeq(melodyFinal, kickFinal) : generateAISeq()}>
             <button className='text-white font-bold px-4 py-2 rounded bg-blue-600'>Generate</button>
         </div>
         <div className='mt-1 w-full flex-wrap flex justify-center'>

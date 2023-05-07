@@ -63,7 +63,7 @@ function Drums(pitch) { //the current recorded pitch
     timer++;
     hasPlayed = false;
   } else if(!hasPlayed){
-    duration[currentIndex] = timer; //convert timer to more useful time measurement
+    duration[currentIndex] = timer / 10; //convert timer to more useful time measurement
     timer = 0;
     currentIndex++; 
     hasPlayed = true;
@@ -83,6 +83,7 @@ function Tuner(props) {
   const updatePitch = (time) => {
     analyserNode.getFloatTimeDomainData(buf);
     let ac = autoCorrelate(buf, audioCtx.sampleRate);
+    props.drums ? Drums(parseFloat(ac).toFixed(2)) : null;
     if (ac > -1) {
       let note = noteFromPitch(ac);
       let sym = noteStrings[note % 12];
@@ -93,7 +94,7 @@ function Tuner(props) {
       setPitchScale(scl);
       setDetune(dtune);
       setNotification(false);
-      props.drums ? Drums(parseFloat(ac).toFixed(2)) : tempNotes.push(sym+scl);
+      props.drums ? null : tempNotes.push(sym+scl);
       console.log(note, sym, scl, dtune, ac);
     }
   };
@@ -109,6 +110,7 @@ function Tuner(props) {
     finalNotes = []
     tempNotes = []
     duration = []
+    currentIndex = 0
     setIntID(setInterval(updatePitch, 100))
     const input = await getMicInput();
 
@@ -125,7 +127,11 @@ function Tuner(props) {
     source.disconnect(analyserNode);
     clearInterval(intID);
     setStart(false);
+    if(duration.length > 0){
+      duration[0] = 0
+    }
     let finalArr = props.drums ? duration : CompressMelody();
+    console.log(duration)
     props.setSeq(finalArr)
   };
 
