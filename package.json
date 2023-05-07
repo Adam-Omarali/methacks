@@ -16,7 +16,9 @@
     "electron-serve": "^1.1.0",
     "electron-store": "^8.1.0",
     "fingerpose": "^0.1.0",
-    "react-webcam": "^7.0.1"
+    "react-webcam": "^7.0.1",
+    "@magenta/music": "^1.23.1",
+    "webm-to-wav-converter": "^1.1.0"
   },
   "devDependencies": {
     "@types/node": "^18.11.18",
