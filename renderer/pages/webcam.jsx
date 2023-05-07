@@ -11,22 +11,32 @@ import React, { useRef, useState, useEffect } from "react";
 import * as tf from "@tensorflow/tfjs";
 import * as handpose from "@tensorflow-models/handpose";
 import Webcam from "react-webcam";
-import { drawHand } from "../utilities";
+import { drawHand } from "../util/utilities";
+import killas from "../util/killas";
+import fist from "../util/fist";
+import one from "../util/one";
+import two from "../util/two";
+import three from "../util/three";
+import four from "../util/four";
+import five from "../util/five";
+
+
 
 import * as fp from "fingerpose";
+
 
 function Camrecognize() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   const [cameraOn, setCameraOn] = useState(false);
-  const [emoji, setEmoji] = useState(null);
-  const images = { thumbs_up: "/images/thumbs_up.png", victory: "/images/victory.png" };
+  const [gestureName, setGestureName] = useState(null);
+  const [heightPCT, setHeightPCT] = useState(1);
 
 
   const runHandpose = async () => {
-    const net = await handpose.load()
+    const net = await handpose.load();
     console.log("[+] handpose is loaded")
-    setInterval(() => { detect(net) }, 500)
+    setInterval(() => { detect(net) }, 300)
   }
 
   const detect = async (net) => {
@@ -40,27 +50,36 @@ function Camrecognize() {
       canvasRef.current.width = videoWidth;
       canvasRef.current.height = videoHeight;
 
+      const ctx = canvasRef.current.getContext("2d");
+
       const hand = await net.estimateHands(video);
 
       if (hand.length > 0) {
+        setHeightPCT((videoHeight - (hand[0].boundingBox.bottomRight[1] + hand[0].boundingBox.topLeft[1]) / 2) / videoHeight)
+        console.log(`Volume height: ${heightPCT}`);
         const GE = new fp.GestureEstimator(
           [
-            fp.Gestures.VictoryGesture,
-            fp.Gestures.ThumbsUpGesture
+            fist,
+            one,
+            two,
+            three,
+            four,
+            five,
           ]
         )
 
         const gesture = await GE.estimate(hand[0].landmarks, 8)
+
         if (gesture.gestures !== undefined && gesture.gestures.length > 0) {
           const confidence = gesture.gestures.map((prediction) => prediction.score);
           const maxConfidence = confidence.indexOf(Math.max.apply(null, confidence));
-          setEmoji(gesture.gestures[maxConfidence].name);
-          console.log(emoji)
+          setGestureName(gesture.gestures[maxConfidence].name);
         }
+
       }
 
-      const ctx = canvasRef.current.getContext("2d");
-      drawHand(hand, ctx);
+      drawHand(hand, [videoWidth, videoHeight], ctx);
+
     }
   }
 
@@ -68,12 +87,11 @@ function Camrecognize() {
 
   return (
     <React.Fragment>
-      <div>
+      <div style={{ position: 'relative' }}>
         {cameraOn && <Webcam
           ref={webcamRef}
           style={{
             position: "absolute",
-            marginLeft: "auto",
             marginRight: "auto",
             left: 0,
             right: 0,
@@ -101,23 +119,42 @@ function Camrecognize() {
           }}
         />}
 
-        {emoji !== null ? (
+        {gestureName !== null ? (
           <img
-            src={images[emoji]}
+            src={`/images/${gestureName}.png`}
             style={{
               position: "absolute",
               marginLeft: "auto",
               marginRight: "auto",
-              left: 400,
-              bottom: 500,
-              right: 0,
+              left: '80%',
+              top: 10,
               textAlign: "center",
-              height: 100,
+              height: 80,
             }}
           />
         ) : (
           ""
         )}
+
+        {/* {gestureName !== null ? (
+          <div
+            style={{
+              position: 'absolute',
+              zIndex: 10,
+              top: 10,
+              left: '90%',
+              transform: 'translateX(-50%)',
+              backgroundColor: 'white',
+              borderRadius: '5px',
+              padding: '10px',
+              boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.3)',
+            }}
+          >
+            <p style={{ color: "black", margin: 0 }}>{gestureName}</p>
+          </div>
+        ) : (
+          ''
+        )} */}
 
         <button className='btn-blue' onClick={() => setCameraOn(!cameraOn)} style={{
           position: 'absolute',
