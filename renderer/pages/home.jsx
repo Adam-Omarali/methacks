@@ -48,6 +48,16 @@ function Home() {
     totalQuantizedSteps: 8
   };
 
+  let pitch = ["E#3", "C3", "D3", "E3", "F#3", "G4"];
+  let duration = [80,60,90,40,30,100];
+  let basePitch = [36,48,60,72];
+  let pitchLetter = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+
+  const EXAMPLE = {
+    notes: [seqGen(duration)],
+    totalTime: 8
+  }
+
   let fontSelection = [[40,41,42,43],[68,73,60,70],[56,59,57,58]];
 
   let avoidChord = [2,6,8];
@@ -56,6 +66,39 @@ function Home() {
   
   const rnn_steps = 200;
   const rnn_temperature = 1.5;
+
+  function returnPitch(i, pitch) {
+    let alt = pitch[i].substring(-1);
+    let baseNote = basePitch[alt-2];
+    let add;
+    if (pitch[i].length == 3){
+      add = pitchLetter.indexOf(pitch[i].substring(0,2));
+    }
+    else{
+      add = pitchLetter.indexOf(pitch[i].substring(0));
+    }
+    let note;
+    return note = baseNote+add;
+  }
+
+  function seqGen(duration) {
+    let startT = [];
+    let endT = [];
+    let cnt;
+    for (let i = 0; i < duration.length; i++) {
+      cnt += duration[i-1]/128;
+      if (i==0){
+        startT[i] = 0;
+      }else{
+        startT[i] = cnt;
+      }
+      endT[i] = cnt;
+    }
+    
+    for (let i = 0; i < duration.length; i++) {
+      return {pitch: returnPitch(i,pitch), startTime: startT[i], endTime: endT[i]}+",\n";
+    }
+  }
 
   useEffect(() => {
 
@@ -73,24 +116,6 @@ function Home() {
 
     // let player = new core.Player();
     // player.start(DRUMS);
-
-
-// function play2() {
-//   if (rnnDrum.isPlaying()) {
-//     rnnDrum.stop();
-//     return;
-//   }
-  
-//   const qns = core.sequences.quantizeNoteSequence(DRUMS, 4);
-//   console.log(qns)
-//   drumPlayer
-//   .continueSequence(qns, rnn_steps, rnn_temperature)
-  // .then((sample) => {
-  //   rnnDrum.start(sample);
-  //   // console.log(sample)
-  // });
-// }
-  
           
   // melody generation
 
@@ -100,7 +125,7 @@ function play() {
     return;
   }
   
-  const qns = core.sequences.quantizeNoteSequence(TWINKLE_TWINKLE, 4);
+  const qns = core.sequences.quantizeNoteSequence(EXAMPLE, 4);
   console.log(qns)
   melodyPlayer
   .continueSequence(qns, rnn_steps, rnn_temperature)
