@@ -6,24 +6,14 @@ function Home() {
   return (
     <React.Fragment>
       <Head>
-        <title>Home - Nextron (with-typescript-tailwindcss)</title>
+        <title>vivAIldi</title>
       </Head>
-      <div className='grid grid-col-1 text-2xl w-full text-center'>
-        <img className='ml-auto mr-auto' src='/images/logo.png' />
-        <span>⚡ Electron ⚡</span>
-        <span>+</span>
-        <span>Next.js</span>
-        <span>+</span>
-        <span>tailwindcss</span>
-        <span>=</span>
-        <span>💕 </span>
-      </div>
       <div className='mt-1 w-full flex-wrap flex justify-center'>
-        <Link href='/next'>
-          <a className='btn-blue'>Tuner</a>
+        <Link href='/create'>
+          <a className='btn-blue'>Create</a>
         </Link>
       </div>
-      <div className='mt-1 w-full flex-wrap flex justify-center'>
+      {/* <div className='mt-1 w-full flex-wrap flex justify-center'>
         <Link href='/drums'>
           <a className='btn-blue'>Drums</a>
         </Link>
@@ -32,7 +22,7 @@ function Home() {
         <Link href='/microphone'>
           <a className='btn-blue'>Microphone</a>
         </Link>
-      </div>
+      </div> */}
     </React.Fragment>
   );
 }

@@ -11,7 +11,7 @@ import Link from "next/link";
 const audioCtx = AudioContext.getAudioContext();
 const analyserNode = AudioContext.getAnalyser();
 const buflen = 2048;
-var buf = new Float32Array(buflen);
+let buf = new Float32Array(buflen);
 
 const noteStrings = [
   "C",
@@ -28,11 +28,53 @@ const noteStrings = [
   "B",
 ];
 
-const finalNotes = []
-const tempNotes = []
-const finalDuration = []
+let finalNotes = []
+let tempNotes = []
+let finalDuration = []
 
-function App() {
+function CompressMelody(){
+  let lastChange = 0;
+  tempNotes.push("PP")
+  for(let i = 0; i < tempNotes.length-1;i++){
+    let currNote = tempNotes[i]
+    if (tempNotes[i]!=tempNotes[i+1]){
+      if(i-lastChange > 2){
+        finalNotes.push(currNote)
+        finalDuration.push(0.1*(i-lastChange))
+        lastChange = i
+      }
+    }
+  }
+  if(finalNotes[0].duration < 0.3) finalNotes.splice(0, 1)
+  tempNotes = []
+  finalNotes = []
+  finalDuration = []
+}
+
+let prevPitch;
+let hasRun = false;
+let timer = 0;
+let currentIndex=0;
+let duration = [];
+let hasPlayed = false;
+
+function Drums(pitch) { //the current recorded pitch
+  if(!hasRun) {
+    prevPitch = pitch;
+    hasRun=true;
+  }
+  if(pitch <= prevPitch) {
+    timer++;
+    hasPlayed = false;
+  } else if(!hasPlayed){
+    duration[currentIndex] = timer; //convert timer to more useful time measurement
+    timer = 0;
+    currentIndex++; 
+    hasPlayed = true;
+  }
+}
+
+function Tuner(props) {
   const [source, setSource] = useState(null);
   const [started, setStart] = useState(false);
   const [pitchNote, setPitchNote] = useState("C");
@@ -40,14 +82,11 @@ function App() {
   const [pitch, setPitch] = useState("0 Hz");
   const [detune, setDetune] = useState("0");
   const [notification, setNotification] = useState(false);
-  const [notes, setNotes] = useState();
-  const [count, setCount] = useState(0)
   const [intID, setIntID] = useState();
 
   const updatePitch = (time) => {
     analyserNode.getFloatTimeDomainData(buf);
-    var ac = autoCorrelate(buf, audioCtx.sampleRate);
-    setCount(count++)
+    let ac = autoCorrelate(buf, audioCtx.sampleRate);
     if (ac > -1) {
       let note = noteFromPitch(ac);
       let sym = noteStrings[note % 12];
@@ -58,7 +97,7 @@ function App() {
       setPitchScale(scl);
       setDetune(dtune);
       setNotification(false);
-      tempNotes.push(sym+scl);
+      props.drums ? Drums(parseFloat(ac).toFixed(2)) : tempNotes.push(sym+scl);
       console.log(note, sym, scl, dtune, ac);
     }
   };
@@ -89,25 +128,9 @@ function App() {
   const stop = () => {
     source.disconnect(analyserNode);
     clearInterval(intID);
-    setCount(0)
     setStart(false);
-    console.log(count)
-    let lastChange = 0;
-    tempNotes.push("PP")
-    for(let i = 0; i < tempNotes.length-1;i++){
-      let currNote = tempNotes[i]
-      if (tempNotes[i]!=tempNotes[i+1]){
-        if(i-lastChange > 2){
-          finalNotes.push(currNote)
-          finalDuration.push(0.1*(i-lastChange))
-          lastChange = i
-        }
-      }
-    }
-    if(finalNotes[0].duration < 0.3) finalNotes.splice(0, 1)
-    tempNotes = []
-    finalNotes = []
-    finalDuration = []
+    let finalArr = props.drums ? duration : CompressMelody();
+    console.log(finalArr)
   };
 
   const getMicInput = () => {
@@ -122,7 +145,8 @@ function App() {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen">
+    <div className="flex flex-col justify-center items-center">
+      <h1>{props.instrument}</h1>
       <div
         className={
           notification
@@ -190,13 +214,8 @@ function App() {
           </button>
         )}
       </div>
-      <div className='mt-1 w-full flex-wrap flex justify-center'>
-            <Link href="/home">
-                <a className='text-white font-bold px-4 py-2 rounded bg-black-600'>Home</a>
-            </Link>
-      </div>
     </div>
   );
 }
 
-export default App;
+export default Tuner;
