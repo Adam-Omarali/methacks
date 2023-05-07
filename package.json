@@ -11,16 +11,10 @@
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
-    "@electron/remote": "^2.0.9",
-    "@ffmpeg/core": "^0.11.0",
     "@ffmpeg/ffmpeg": "^0.11.6",
     "electron-serve": "^1.1.0",
     "electron-store": "^8.1.0",
-    "get-user-media-promise": "^1.1.4",
-    "microphone-stream": "^6.0.1",
-    "ml5": "^0.12.2",
-    "react-audio-voice-recorder": "^1.0.10",
-    "react-media-recorder": "^1.6.6"
+    "webm-to-wav-converter": "^1.1.0"
   },
   "devDependencies": {
     "@types/node": "^18.11.18",
