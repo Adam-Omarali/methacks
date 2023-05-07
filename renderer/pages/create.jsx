@@ -13,7 +13,7 @@ const fontSelection = [[40, 41, 42, 43], [68, 73, 60, 70], [56, 59, 57, 58]];
 
 let avoidChord = [6, 8, 11];
 
-let fontIdx = 0;
+let fontIdx = 1;
 
 let melodyPlayer = new music_rnn.MusicRNN('https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/melody_rnn');
 let rnnPlayer = new core.SoundFontPlayer('https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus');
@@ -43,7 +43,6 @@ const TWINKLE_TWINKLE = {
 
 // melody generation
 async function generateAISeq() {
-    const startTime = 0.0;
 
     if (rnnPlayer.isPlaying()) {
         rnnPlayer.stop();
