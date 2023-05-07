@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-const core = require('@magenta/music/node/core');
-const music_rnn = require('@magenta/music/node/music_rnn');
 
 function Home() {
   return (
