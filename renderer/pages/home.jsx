@@ -19,7 +19,7 @@ function Home() {
         <span>💕 </span>
       </div>
       <div className='mt-1 w-full flex-wrap flex justify-center'>
-        <Link href='/next'>
+        <Link href='/webcam'>
           <a className='btn-blue'>Go to next page</a>
         </Link>
       </div>
